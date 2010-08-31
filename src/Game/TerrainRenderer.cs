@@ -45,19 +45,19 @@ namespace Game {
         /// </summary>
         static readonly Dictionary<TerrainType, Point> textureOffsets = new Dictionary<TerrainType, Point>() {
             { TerrainType.Snow,             new Point(0, 0) },
-            { TerrainType.Desert,           new Point(0, 1) },
-            { TerrainType.Swamp,            new Point(0, 2) },
-            { TerrainType.Meadow_flowers,   new Point(0, 3) },
-            { TerrainType.Mountain1,        new Point(1, 0) },
+            { TerrainType.Desert,           new Point(1, 0) },
+            { TerrainType.Swamp,            new Point(2, 0) },
+            { TerrainType.Meadow_flowers,   new Point(3, 0) },
+            { TerrainType.Mountain1,        new Point(0, 1) },
             { TerrainType.Mountain2,        new Point(1, 1) },
-            { TerrainType.Mountain3,        new Point(1, 2) },
-            { TerrainType.Mountain4,        new Point(1, 3) },
-            { TerrainType.Savannah,         new Point(2, 0) },
-            { TerrainType.Meadow1,          new Point(2, 0) },
-            { TerrainType.Meadow2,          new Point(2, 1) },
-            { TerrainType.Meadow3,          new Point(2, 2) },
-            { TerrainType.Steppe,           new Point(2, 3) },
-            { TerrainType.MountainMeadow,   new Point(3, 0) },
+            { TerrainType.Mountain3,        new Point(2, 1) },
+            { TerrainType.Mountain4,        new Point(3, 1) },
+            { TerrainType.Savannah,         new Point(0, 2) },
+            { TerrainType.Meadow1,          new Point(1, 2) },
+            { TerrainType.Meadow2,          new Point(2, 2) },
+            { TerrainType.Meadow3,          new Point(3, 2) },
+            { TerrainType.Steppe,           new Point(0, 3) },
+            { TerrainType.MountainMeadow,   new Point(1, 3) },
             { TerrainType.Water,            new Point(4 * TerrainTextureSize, TerrainTextureSize) },
             { TerrainType.Lava,             new Point(4 * TerrainTextureSize, TerrainTextureSize + SpecialTextureSize.Y) },
         };
@@ -191,7 +191,7 @@ namespace Game {
         void renderWithVBOs() {
             int i = 0;
             foreach (var terrain in sortedVertices.Keys) {
-                GL.BindTexture(TextureTarget.Texture2D, (int)terrain);
+                GL.BindTexture(TextureTarget.Texture2D, glTextures[terrain]);
                 GL.BindBuffer(BufferTarget.ArrayBuffer, vbos[i++]);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, vbos[i++]);
                 GL.InterleavedArrays(InterleavedArrayFormat.T2fN3fV3f, 0, (IntPtr)null);
@@ -346,6 +346,7 @@ namespace Game {
             normalList.Add(normals[p0y, p0x]);
             normalList.Add(normals[p1y, p1x]);
             normalList.Add(normals[p2y, p2x]);
+            //textureList.Add(TerrainType.Swamp);
             textureList.Add((TerrainType)map.GetData(MapLayerType.Terrain2, p0x, p0y));
         }
         

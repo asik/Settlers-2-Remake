@@ -89,6 +89,18 @@ namespace Game {
             for (int i = 0; i < NUM_LAYERS; ++i) {
                 ReadLayer(binaryReader, (MapLayerType)i);
             }
+            ConvertTerrain();
+        }
+
+        void ConvertTerrain() {
+            var conversionFunction = new byte[] { 8, 4, 0, 2, 1, 14, 0, 1, 9, 10, 11, 5, 6, 7, 12, 3, 15, 0, 13, 14 };
+            for (int i = (int)MapLayerType.Terrain1; i <= (int)MapLayerType.Terrain2; ++i) {
+                var layer = layers[(MapLayerType)i];
+                var length = layer.Data.Length;
+                for (int j = 0; j < length; ++j) {
+                    layer.Data[j] = conversionFunction[layer.Data[j]];
+                }
+            }
         }
 
         void ReadLayer(BinaryReader binaryReader, MapLayerType type) {
