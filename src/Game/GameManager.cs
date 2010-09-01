@@ -29,12 +29,12 @@ namespace Game {
 
         protected override void OnLoad(EventArgs e) {
             keyboard = new GameKeyboard(Keyboard);
-            currentMap = new Map(AssetDirectory + "/DATA/MAPS4/MAP01.SWD");
+            currentMap = new Map(AssetDirectory + "/DATA/MAPS2/NAMERICA.SWD");
             GL.ClearColor(Color.Black);
             cameraPosition = new Vector3(0, -cameraHeight * (float)Math.Tan(Math.Asin(TerrainRenderer.triangleHeight / TerrainRenderer.triangleWidth)), cameraHeight);
             cameraTarget = new Vector3(0, 0, 0);
-            //projection = Matrix4.CreatePerspectiveFieldOfView((float)(Math.PI / 2.0), (float)ClientSize.Width / (float)ClientSize.Height, 0.001f, 1000.0f);
-            projection = Matrix4.CreateOrthographic((float)ClientSize.Width / TerrainRenderer.triangleWidth, (float)ClientSize.Height / TerrainRenderer.triangleHeight, 0.001f, 1000.0f);
+            projection = Matrix4.CreatePerspectiveFieldOfView((float)(Math.PI / 2.0), (float)ClientSize.Width / (float)ClientSize.Height, 0.001f, 1000.0f);
+            //projection = Matrix4.CreateOrthographic((float)ClientSize.Width / TerrainRenderer.triangleWidth, (float)ClientSize.Height / TerrainRenderer.triangleHeight, 0.001f, 1000.0f);
 
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
