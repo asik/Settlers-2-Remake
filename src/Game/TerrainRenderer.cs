@@ -12,10 +12,33 @@ using System.Diagnostics;
 
 namespace Game {
 
+    public struct Vector2i {
+        public int X;
+        public int Y;
+        public Vector2i(int x, int y) { X = x; Y = y; }
+        public Vector2 ToVector2() {
+            return new Vector2((float)X, (float)Y);
+        }
+    }
+
+    public struct Triangle2i {
+        public Vector2i P0;
+        public Vector2i P1;
+        public Vector2i P2;
+        public Triangle2i(Vector2i p0, Vector2i p1, Vector2i p2) {
+            P0 = p0; P1 = p1; P2 = p2;
+        }
+    }
+
     public struct Triangle {
         public Vector3 P0;
         public Vector3 P1;
         public Vector3 P2;
+        public Triangle(Vector3 p0, Vector3 p1, Vector3 p2) {
+            P0 = p0;
+            P1 = p1;
+            P2 = p2;
+        }
     }
 
 
@@ -164,13 +187,13 @@ namespace Game {
             GL.Enable(EnableCap.Light1);
             GL.Enable(EnableCap.Texture2D);
 
-            GL.ShadeModel(ShadingModel.Smooth);
-            GL.Light(LightName.Light0, LightParameter.Ambient, new Color4(0, 0, 0, byte.MaxValue));
-            GL.Light(LightName.Light0, LightParameter.Diffuse, new Color4(200, 200, 200, byte.MaxValue));
-            GL.Light(LightName.Light0, LightParameter.Position, new Vector4(1, 1, -1, 0));
-            GL.Light(LightName.Light1, LightParameter.Ambient, new Color4(0, 0, 0, byte.MaxValue));
-            GL.Light(LightName.Light1, LightParameter.Diffuse, new Color4(135, 128, 128, byte.MaxValue));
-            GL.Light(LightName.Light1, LightParameter.Position, new Vector4(-1, -1, -1, 0));
+            GL.ShadeModel(ShadingModel.Flat);
+            GL.Light(LightName.Light0, LightParameter.Ambient, new Color4(127, 127, 127, (sbyte)0));
+            //GL.Light(LightName.Light0, LightParameter.Diffuse, new Color4(200, 200, 200, sbyte.MaxValue));
+            //GL.Light(LightName.Light0, LightParameter.Position, new Vector4(1, 1, -1, 0));
+            //GL.Light(LightName.Light1, LightParameter.Ambient, new Color4(0, 0, 0, byte.MaxValue));
+            //GL.Light(LightName.Light1, LightParameter.Diffuse, new Color4(135, 128, 128, byte.MaxValue));
+            //GL.Light(LightName.Light1, LightParameter.Position, new Vector4(-1, -1, -1, 0));
 
             //renderImmediate();
             renderWithVBOs();
@@ -195,6 +218,9 @@ namespace Game {
 
         void renderWithVBOs() {
             int i = 0;
+            GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Decal);
+            //GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.RgbScale, 1.0f);
+            GL.Disable(EnableCap.Blend);
             foreach (var terrain in sortedVertices.Keys) {
                 GL.BindTexture(TextureTarget.Texture2D, glTextures[terrain]);
                 GL.BindBuffer(BufferTarget.ArrayBuffer, vbos[i++]);
@@ -255,7 +281,7 @@ namespace Game {
                     else if (y == (map.Height - 1) && (x > 0 && x < (map.Width - 1))) {
                         // front edge - 3 tri 4 vertices
                         v1 = GetMapVertex(x + 1, y) - GetMapVertex(x, y);
-                        v2 = GetMapVertex(y - 1, x + 1) - GetMapVertex(x, y);
+                        v2 = GetMapVertex(x - 1, y - 1) - GetMapVertex(x, y);
                         v3 = GetMapVertex(x, y - 1) - GetMapVertex(x, y);
                         v4 = GetMapVertex(x - 1, y) - GetMapVertex(x, y);
                         n1 = Vector3.Cross(v1, v2); n2 = Vector3.Cross(v2, v3); n3 = Vector3.Cross(v3, v4);
@@ -323,6 +349,15 @@ namespace Game {
             var texCoordB = new Vector2(0, 1);
             var texCoordC = new Vector2(1, 1);
             var texCoordD = new Vector2(1, 0);
+            // Texture coordinates for a triangle pointing down
+            var tdLeft = new Vector2(0, 0.5f);
+            var tdRight = new Vector2(0.5f, 0.5f);//0.47f, 0f);
+            var tdDown = new Vector2(0.25f, 0f);//0.225f, 0.45f);
+            // Texture coordinates for a triangle pointing up
+            var tuUp = new Vector2(0.25f, 0.5f);//0.225f, 0);
+            var tuLeft = new Vector2(0f, 0f);//0, 0.45f);
+            var tuRight = new Vector2(0.5f, 0f);//0.45f, 0.45f);
+
             // Textures for lava and water are actually rotated
             var texCoordWA = new Vector2(0.5f, 0);
             var texCoordWB = new Vector2(0, 0.5f);
@@ -334,21 +369,29 @@ namespace Game {
                     if ((y & 1) == 0) {
                         // Even rows
                             if (x > 0) {
-                                addTriangle(triangleList, normalList, textureList, MapLayerType.Terrain1, x, y, x - 1, y + 1, x, y + 1);//x, y + 1, x, y, x - 1, y + 1);
+                                // vertices
+                                //var v0 = new Vector2i(x, y);
+                                //var v1 = new Vector2i(x - 1, y + 1);
+                                //var v2 = new Vector2i(x, y + 1);
+                                addTriangle(triangleList, normalList, textureList, MapLayerType.Terrain1, x, y, x - 1, y + 1, x, y + 1);
                                 if (isLavaOrWater(x, y, MapLayerType.Terrain1)) {
                                     texCoordList.AddRange(new[] { texCoordWD, texCoordWB, texCoordWC });
                                 }
                                 else {
-                                    texCoordList.AddRange(new[] { texCoordD, texCoordB, texCoordC });
+                                    texCoordList.AddRange(new[] { tuUp, tuLeft, tuRight });//new[] { texCoordD, texCoordB, texCoordC });
                                 }
                             }
                             if (x < map.Width - 1) {
+                                // vertices
+                                //var v0 = new Vector2i(x, y);
+                                //var v1 = new Vector2i(x, y + 1);
+                                //var v2 = new Vector2i(x + 1, y);
                                 addTriangle(triangleList, normalList, textureList, MapLayerType.Terrain2, x, y, x, y + 1, x + 1, y);
                                 if (isLavaOrWater(x, y, MapLayerType.Terrain2)) {
                                     texCoordList.AddRange(new[] { texCoordWA, texCoordWB, texCoordWD });
                                 }
                                 else {
-                                    texCoordList.AddRange(new[] { texCoordA, texCoordB, texCoordD });
+                                    texCoordList.AddRange(new[] { tdLeft, tdDown, tdRight });//texCoordA, texCoordB, texCoordD });
                                 }
                             }
                     }
@@ -361,13 +404,13 @@ namespace Game {
                                 texCoordList.AddRange(new[] { texCoordWD, texCoordWB, texCoordWC });
                             }
                             else {
-                                texCoordList.AddRange(new[] { texCoordD, texCoordB, texCoordC});
+                                texCoordList.AddRange(new[] { tuUp, tuLeft, tuRight });
                             }
                             if (isLavaOrWater(x, y, MapLayerType.Terrain2)) {
                                 texCoordList.AddRange(new[] { texCoordWA, texCoordWB, texCoordWD });
                             }
                             else {
-                                texCoordList.AddRange(new[] { texCoordA, texCoordB, texCoordD });
+                                texCoordList.AddRange(new[] { tdLeft, tdDown, tdRight });
                             }
                             //texCoordList.AddRange(new[] { texCoordD, texCoordB, texCoordC, texCoordA, texCoordB, texCoordD });
                         }
@@ -385,7 +428,16 @@ namespace Game {
             return terrainType == TerrainType.Lava || terrainType == TerrainType.Water;
         }
 
-        void addTriangle(List<Triangle> triangleList, List<Vector3> normalList, List<TerrainType> textureList, MapLayerType layer, int p0x, int p0y, int p1x, int p1y, int p2x, int p2y) {//int y, int x) {
+        //void addTriangle(List<Triangle> triangleList, List<Vector3> normalList, List<TerrainType> textureList, MapLayerType layer,
+        //    Triangle2i triangle) {
+        //        addTriangle(triangleList, normalList, textureList, layer, 
+        //            triangle.P0.X, triangle.P0.Y, 
+        //            triangle.P1.X, triangle.P1.Y, 
+        //            triangle.P2.X, triangle.P2.Y);
+        //}
+
+        void addTriangle(List<Triangle> triangleList, List<Vector3> normalList, List<TerrainType> textureList, MapLayerType layer,
+            int p0x, int p0y, int p1x, int p1y, int p2x, int p2y) {
             triangleList.Add(new Triangle {
                 P0 = GetMapVertex(p0x, p0y),
                 P1 = GetMapVertex(p1x, p1y),
@@ -398,17 +450,23 @@ namespace Game {
             textureList.Add((TerrainType)map.GetData(layer, p0x, p0y));
         }
         
+        /// <summary>
+        /// Generates the position of the vertex for map coords x, y.
+        /// Shifts x for uneven rows; 
+        /// Inverts y;
+        /// Gets z from map data.
+        /// </summary>
         Vector3 GetMapVertex(int x, int y) {
             return new Vector3(
                 x + ((y & 1) == 0 ? 0.0f : 0.5f),
-                y,
+                map.Height - y - 1,
                 adjustedHeight(map.GetData(MapLayerType.Altitude, x, y))
             );
         }
         
         float adjustedHeight(byte rawAltitude) {
             float divisor = triangleHeight * triangleHeight / triangleWidth;
-            return (-50 + (5 * rawAltitude)) / divisor;
+            return (-50 + (2 * rawAltitude)) / divisor;
         }
     }
 }

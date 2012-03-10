@@ -75,6 +75,25 @@ namespace Game {
             using (var binaryReader = new BinaryReader(File.Open(filePath, FileMode.Open))) {
                 Load(binaryReader);
             }
+            var mapAsTextLayer1 = new List<string>();
+            var mapAsTextLayer2 = new List<string>();
+            var mapAsTextLayer3 = new List<string>();
+            for (int y = 0; y < Height; ++y) {
+                var line1 = new StringBuilder();
+                var line2 = new StringBuilder();
+                var line3 = new StringBuilder();
+                for (int x = 0; x < Width; ++x) {
+                    line1.Append(GetData(MapLayerType.Terrain1, x, y));
+                    line2.Append(GetData(MapLayerType.Terrain2, x, y));
+                    line3.Append(GetData(MapLayerType.Altitude, x, y));
+                }
+                mapAsTextLayer1.Add(line1.ToString());
+                mapAsTextLayer2.Add(line2.ToString());
+                mapAsTextLayer3.Add(line3.ToString());
+            }
+            File.WriteAllLines(filePath + "Terrain1AsText.txt", mapAsTextLayer1.ToArray());
+            File.WriteAllLines(filePath + "Terrain2AsText.txt", mapAsTextLayer2.ToArray());
+            File.WriteAllLines(filePath + "AltitudeAsText.txt", mapAsTextLayer3.ToArray());
         }
 
 
@@ -134,7 +153,5 @@ namespace Game {
             NumPlayers = binaryReader.ReadByte();
             Author = binaryReader.ReadNullTerminatedASCIIString(20);
         }
-
-
     }
 }

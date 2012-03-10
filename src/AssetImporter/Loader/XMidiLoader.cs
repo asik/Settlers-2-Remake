@@ -48,60 +48,60 @@ namespace AssetImporter {
         }
 
         void ConvertToWav(string targetFileName) {
-			var process = getTimidityProcess();
-			if (!File.Exists(process.StartInfo.FileName)) {
-				throw new Exception("Could not find midi-to-wav converter timidity++ in working directory");
-			}
+            var process = getTimidityProcess();
+            if (!File.Exists(process.StartInfo.FileName)) {
+                throw new Exception("Could not find midi-to-wav converter timidity++ in working directory");
+            }
             process.StartInfo.Arguments += " -Ow \"" + targetFileName + "\"";
 
             Converter.worker.ReportProgress(0, Environment.NewLine);
             ExecuteEmbeddedProcess(process);
             File.Delete(targetFileName);
         }
-		
-		
-		void ExecuteEmbeddedProcess(Process process) {
-			process.Start();
-        	process.BeginErrorReadLine();
-        	process.BeginOutputReadLine();
+        
+        
+        void ExecuteEmbeddedProcess(Process process) {
+            process.Start();
+            process.BeginErrorReadLine();
+            process.BeginOutputReadLine();
             process.WaitForExit();
-		}
-		
-		
-		
-		Process getTimidityProcess() {	
-			string fileName = "";
-			string arguments = "";
-			var process = new Process();
-			if (Environment.OSVersion.Platform.ToString().StartsWith("Win")) {
-				fileName = "timidity.exe";
-			}
-			else {
-				fileName = "timidity";
-				arguments = "-x " + "\"soundfont TimGM6mb.sf2\"";
-			}
-			
-			process.StartInfo.RedirectStandardError = true;
+        }
+        
+        
+        
+        Process getTimidityProcess() {	
+            string fileName = "";
+            string arguments = "";
+            var process = new Process();
+            if (Environment.OSVersion.Platform.ToString().StartsWith("Win")) {
+                fileName = "timidity.exe";
+            }
+            else {
+                fileName = "timidity";
+                arguments = "-x " + "\"soundfont TimGM6mb.sf2\"";
+            }
+            
+            process.StartInfo.RedirectStandardError = true;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.UseShellExecute = false;
             process.ErrorDataReceived += timidity_DataReceived;
             process.OutputDataReceived += timidity_DataReceived;
-			process.StartInfo.FileName = fileName;
-			process.StartInfo.Arguments = arguments;
-			return process;
-		}
+            process.StartInfo.FileName = fileName;
+            process.StartInfo.Arguments = arguments;
+            return process;
+        }
 
 
-		
+        
         void timidity_DataReceived(object sender, DataReceivedEventArgs e) {
             if (!String.IsNullOrEmpty(e.Data)) {
                 Converter.worker.ReportProgress(0, "\t" + e.Data + Environment.NewLine );
             }
         }
 
-		
-		
+        
+        
         void SkipToEVNT() {
             var stringBuilder = new StringBuilder(5);
             while (stringBuilder.ToString() != "EVNT") {
@@ -112,7 +112,7 @@ namespace AssetImporter {
             }
         }
 
-		
+        
         
         List<MidiToken> ReadTokens(out int tempo) {
             var tokenList = new List<MidiToken>();
@@ -194,8 +194,8 @@ namespace AssetImporter {
             return tokenList;
         }
 
-		
-		
+        
+        
         MidiToken NewToken(List<MidiToken> tokens, int time, byte type) {
             var token = new MidiToken { Time = time, Type = type, OriginalIndex = tokens.Count };
             tokens.Add(token);
@@ -203,7 +203,7 @@ namespace AssetImporter {
         }
 
 
-		
+        
         void WriteMidi(int tempo, List<MidiToken> tokenList, BinaryWriter binaryWriter) {
             binaryWriter.Write(Encoding.ASCII.GetBytes("MThd\0\0\0\x06\0\0\0\x01"));
             binaryWriter.BE_Write((ushort)((tempo * 3) / 25000));
@@ -261,7 +261,7 @@ namespace AssetImporter {
         }
 
 
-		
+        
         public void Load(string sourceFile, string destinationDirectory) {
             using (var binaryReader = new BinaryReader(File.Open(sourceFile, FileMode.Open))) {
                 var container = new string(binaryReader.ReadChars(4));
