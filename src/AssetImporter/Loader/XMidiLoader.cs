@@ -54,7 +54,7 @@ namespace AssetImporter {
             }
             process.StartInfo.Arguments += " -Ow \"" + targetFileName + "\"";
 
-            Converter.worker.ReportProgress(0, Environment.NewLine);
+            //Converter.worker.ReportProgress(0, Environment.NewLine);
             ExecuteEmbeddedProcess(process);
             File.Delete(targetFileName);
         }
@@ -62,8 +62,8 @@ namespace AssetImporter {
         
         void ExecuteEmbeddedProcess(Process process) {
             process.Start();
-            process.BeginErrorReadLine();
-            process.BeginOutputReadLine();
+            //process.BeginErrorReadLine();
+            //process.BeginOutputReadLine();
             process.WaitForExit();
         }
         
@@ -80,13 +80,13 @@ namespace AssetImporter {
                 fileName = "timidity";
                 arguments = "-x " + "\"soundfont TimGM6mb.sf2\"";
             }
-            
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.RedirectStandardOutput = true;
+
+            process.StartInfo.RedirectStandardError = false;
+            process.StartInfo.RedirectStandardOutput = false;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.UseShellExecute = false;
-            process.ErrorDataReceived += timidity_DataReceived;
-            process.OutputDataReceived += timidity_DataReceived;
+            //process.ErrorDataReceived += timidity_DataReceived;
+            //process.OutputDataReceived += timidity_DataReceived;
             process.StartInfo.FileName = fileName;
             process.StartInfo.Arguments = arguments;
             return process;

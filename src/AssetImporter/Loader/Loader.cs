@@ -29,6 +29,7 @@ namespace AssetImporter {
 
         public static void LoadFile(string sourceFile, string destinationDirectory) {
 
+            Console.WriteLine("LoadFile: " + sourceFile);
             var extension = Path.GetExtension(sourceFile).ToUpper();
             switch (extension) {
                 case ".ACT":

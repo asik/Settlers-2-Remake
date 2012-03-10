@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 using System.IO;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace AssetImporter {
     public class Converter  {
@@ -12,30 +14,46 @@ namespace AssetImporter {
         public static BackgroundWorker worker;
 
         public void Convert(string sourceDirectory, string targetDirectory, BackgroundWorker backgroundWorker) {
+            var jobs = new List<Task>();
             worker = backgroundWorker;
 
             foreach (var file in fileList) {
                 if (isDirectory(sourceDirectory + file)) {
                     foreach (var subFile in Directory.GetFiles(sourceDirectory + file)) {
                         var baseDir = targetDirectory + file;
-                        LoadFile(file + Path.GetFileName(subFile), subFile, baseDir);
+                        var fileName = file + Path.GetFileName(subFile);
+                        var lambdaSubFile = subFile;
+                        jobs.Add(Task.Factory.StartNew(() => {
+                            worker.ReportProgress(0, "Converting " + Path.GetFileName(lambdaSubFile) + '\n');
+                            LoadFile(fileName, lambdaSubFile, baseDir);
+                        }));
                     }
                 }
                 else {
                     var baseDir = targetDirectory + file;
                     baseDir = Path.GetDirectoryName(baseDir);
-                    LoadFile(file, sourceDirectory + file, baseDir);
+                    string fileName = sourceDirectory + file;
+                    var lambdaFile = file;
+                    if (file.EndsWith("PAL5.BBM")) {
+                        worker.ReportProgress(0, "Converting " + Path.GetFileName(fileName) + '\n');
+                        LoadFile(file, fileName, baseDir);
+                    }
+                    else {
+                        jobs.Add(Task.Factory.StartNew(() => {
+                            worker.ReportProgress(0, "Converting " + Path.GetFileName(fileName) + '\n');
+                            LoadFile(lambdaFile, fileName, baseDir);
+                        }));
+                    }
                 }
             }
 
+            Task.WaitAll(jobs.ToArray());
             Bmp.SaveOffsets(targetDirectory);
             worker.ReportProgress(0, "All done!");
         }
 
         void LoadFile(string shortName, string fileName, string targetDirectory) {
-            worker.ReportProgress(0, "Converting " + shortName + "...");
             Loader.LoadFile(fileName, targetDirectory);
-            worker.ReportProgress(0, " done!\n");
         }
 
         bool isDirectory(string fileName) {
