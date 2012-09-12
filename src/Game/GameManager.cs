@@ -24,7 +24,7 @@ namespace Game {
 
         protected override void OnLoad(EventArgs e) {
             keyboard = new GameKeyboard(Keyboard);
-            currentMap = new Map(AssetDirectory + "/WORLDS/MARSH___.SWD");
+            currentMap = new Map(AssetDirectory + "/DATA/MAPS4/MAP01.SWD");
             GL.ClearColor(Color.Black);
             float zoom = 1.0f;
             cameraPosition = new Vector3(0, -((cameraHeight * TerrainRenderer.triangleWidth) / TerrainRenderer.triangleHeight), cameraHeight);//new Vector3(0, -cameraHeight * (float)Math.Tan(Math.Asin(TerrainRenderer.triangleHeight / TerrainRenderer.triangleWidth)), cameraHeight);
